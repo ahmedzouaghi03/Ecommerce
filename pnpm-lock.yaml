@@ -100,6 +100,9 @@ importers:
       '@monkeyprint/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@prisma/nextjs-monorepo-workaround-plugin':
+        specifier: ^7.8.0
+        version: 7.8.0
       '@tailwindcss/postcss':
         specifier: ^4.0.9
         version: 4.2.4
@@ -847,6 +850,9 @@ packages:
 
   '@prisma/get-platform@5.22.0':
     resolution: {integrity: sha512-pHhpQdr1UPFpt+zFfnPazhulaZYCUqeIcPpJViYoq9R+D/yw4fjE+CtnsnKzPYm0ddUbeXUzjGVGIRVgPDCk4Q==}
+
+  '@prisma/nextjs-monorepo-workaround-plugin@7.8.0':
+    resolution: {integrity: sha512-9KR2LKoyh0fXjLCUQSU/QAq2XD0xlKb66iQDhaaC9eMhBaPNB02f4RHPlMtOuei2z5sxoKRx5+d8Hs0julQh2g==}
 
   '@react-email/render@1.1.2':
     resolution: {integrity: sha512-RnRehYN3v9gVlNMehHPHhyp2RQo7+pSkHDtXPvg3s0GbzM9SQMW4Qrf8GRNvtpLC4gsI+Wt0VatNRUFqjvevbw==}
@@ -2878,6 +2884,8 @@ snapshots:
   '@prisma/get-platform@5.22.0':
     dependencies:
       '@prisma/debug': 5.22.0
+
+  '@prisma/nextjs-monorepo-workaround-plugin@7.8.0': {}
 
   '@react-email/render@1.1.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
     dependencies:
