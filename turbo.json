@@ -12,9 +12,6 @@
     "NEXT_PUBLIC_APP_URL"
   ],
   "tasks": {
-    "db:generate": {
-      "cache": false
-    },
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
