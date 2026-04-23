@@ -175,14 +175,16 @@ async function restoreSoftDeletedUser(input: {
  * Get the currently authenticated user from the JWT cookie.
  */
 export async function getCurrentUser(): Promise<AuthUser | null> {
+  // ✅ 1. Keep await (your Next.js version requires it)
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+
+  if (!token) {
+    return null;
+  }
+
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
-
-    if (!token) {
-      return null;
-    }
-
+    // ✅ 2. Only risky logic inside try
     const secret = getSecret();
     const { payload } = await jwtVerify(token, secret);
 
@@ -218,8 +220,13 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       phoneNumber: user.phoneNumber,
       address: user.address,
     };
-  } catch (error) {
-    console.error("Error getting current user:", error);
+  } catch (error: any) {
+    // ✅ 3. Critical fix: don't swallow Next.js dynamic errors
+    if (error?.digest === "DYNAMIC_SERVER_USAGE") {
+      throw error;
+    }
+
+    console.error("Auth error:", error);
     return null;
   }
 }
