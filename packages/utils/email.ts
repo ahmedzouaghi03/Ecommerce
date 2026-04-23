@@ -1,7 +1,12 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is missing");
+  }
+  return new Resend(apiKey);
+}
 export async function sendPasswordResetEmail(email: string, token: string) {
   const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/resetPassword?token=${token}`;
 
@@ -133,6 +138,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   `;
 
   try {
+    const resend = getResendClient();
     const result = await resend.emails.send({
       from: "Seefood <onboarding@resend.dev>",
       to: email,
@@ -286,7 +292,7 @@ export async function sendContactFormEmail({
 </body>
 </html>
     `;
-
+    const resend = getResendClient();
     const emailResult = await resend.emails.send({
       from: "Seefood <onboarding@resend.dev>",
       to: recipient,
