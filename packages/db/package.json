@@ -3,12 +3,9 @@
     "private": true,
     "main": "./index.ts",
     "scripts": {
-        "tsc": "tsc",
         "clean": "rm -rf dist",
-        "prebuild": "pnpm clean && pnpm db:generate-schemas",
-        "build": "tsc",
-        "db:push": "pnpm prisma db push --skip-generate",
-        "db:generate-schemas": "prisma format && prisma generate"
+        "db:generate": "prisma generate",
+        "db:push": "prisma db push --skip-generate"
     },
     "dependencies": {
         "@prisma/client": "^5.22.0",
