@@ -197,7 +197,7 @@ export function AppHeader({
                     >
                       {t("Orders")}
                     </Link>
-                    <LoginButton className="hidden rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 md:inline-flex" />
+                    <LogoutButton className="rounded-xl px-3 py-2 text-left text-sm font-medium text-red-600 transition hover:bg-red-50" />
                   </div>
                 </div>
               )}
@@ -233,18 +233,22 @@ export function AppHeader({
               <LoginButton className="mt-2 inline-flex justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700" />
             ) : (
               <div className="mt-2 flex flex-col gap-1">
-                <Link
-                  href="/profile"
-                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-800 hover:bg-sky-50 hover:text-sky-700"
-                >
-                  {t("Profile")}
-                </Link>
+                {(user.role === "ADMIN" || user.role === "SUPER_ADMIN") && (
+                  <Link
+                    href="/dashboard"
+                    className="rounded-xl px-3 py-2 text-sm font-medium text-slate-800 transition hover:bg-sky-50 hover:text-sky-700"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {t("Dashboard")}
+                  </Link>
+                )}
                 <Link
                   href="/orders"
                   className="rounded-xl px-3 py-2 text-sm font-medium text-slate-800 hover:bg-sky-50 hover:text-sky-700"
                 >
                   {t("Orders")}
                 </Link>
+                <LogoutButton className="rounded-xl px-3 py-2 text-left text-sm font-medium text-red-600 transition hover:bg-red-50" />
               </div>
             )}
           </nav>
