@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,14 +22,17 @@ import {
   CreditCard,
   ClipboardList,
 } from "lucide-react";
-import { getCurrentUser, AuthUser } from "@/actions/authActions";
-import { getOrdersByUser, SerializedOrder } from "@/actions/ordersActions";
-import { OrderStatus } from "@monkeyprint/db";
+import { getCurrentUser } from "@/actions/authActions";
+import { getOrdersByUser } from "@/actions/ordersActions";
+import type {
+  ActiveOrderTimelineStatus,
+  AuthUser,
+  OrderStatusUiMap,
+  SerializedOrder,
+} from "@/types";
+import PageHero from "@/components/main/PageHero";
 
-const STATUS_CONFIG: Record<
-  OrderStatus,
-  { labelKey: string; color: string; bgColor: string; icon: any }
-> = {
+const STATUS_CONFIG: OrderStatusUiMap = {
   PENDING: {
     labelKey: "Pending",
     color: "var(--warning)",
@@ -68,24 +71,20 @@ const STATUS_CONFIG: Record<
   },
 };
 
-function OrdersSkeleton() {
+const ACTIVE_ORDER_STEPS: ActiveOrderTimelineStatus[] = [
+  "PENDING",
+  "CONFIRMED",
+  "PROCESSING",
+  "SHIPPED",
+  "DELIVERED",
+];
+
+function OrdersListSkeleton() {
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
-      <div className="bg-gradient-to-br from-[#0c4a6e] via-[#0369a1] to-[#0ea5e9] py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="animate-pulse">
-            <div className="h-6 w-32 bg-white/20 rounded mb-4" />
-            <div className="h-10 w-64 bg-white/20 rounded" />
-          </div>
-        </div>
-      </div>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse space-y-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-32 bg-[var(--bg-muted)] rounded-xl" />
-          ))}
-        </div>
-      </div>
+    <div className="animate-pulse space-y-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="h-32 bg-[var(--bg-muted)] rounded-xl" />
+      ))}
     </div>
   );
 }
@@ -96,46 +95,39 @@ function LoginPrompt() {
   const isRTL = locale === "ar";
 
   return (
-    <div
-      className="min-h-screen bg-[var(--bg)] flex items-center justify-center p-4"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-center max-w-md mx-auto py-12 sm:py-16"
       dir={isRTL ? "rtl" : "ltr"}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center max-w-md"
+      <div className="w-24 h-24 bg-[var(--primary-light)] rounded-full flex items-center justify-center mx-auto mb-6">
+        <LogIn className="w-12 h-12 text-[var(--primary)]" />
+      </div>
+      <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+        {t("LoginRequired.Title")}
+      </h2>
+      <p className="text-[var(--text-secondary)] mb-6">
+        {t("LoginRequired.Description")}
+      </p>
+      <Link
+        href="/auth/login"
+        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
+        style={{
+          background:
+            "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
+        }}
       >
-        <div className="w-24 h-24 bg-[var(--primary-light)] rounded-full flex items-center justify-center mx-auto mb-6">
-          <LogIn className="w-12 h-12 text-[var(--primary)]" />
-        </div>
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
-          {t("LoginRequired.Title")}
-        </h1>
-        <p className="text-[var(--text-secondary)] mb-6">
-          {t("LoginRequired.Description")}
-        </p>
-        <Link
-          href="/auth/login"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all hover:scale-105"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
-          }}
-        >
-          <LogIn className="w-5 h-5" />
-          {t("LoginRequired.LoginButton")}
+        <LogIn className="w-5 h-5" />
+        {t("LoginRequired.LoginButton")}
+      </Link>
+      <p className="mt-4 text-sm text-[var(--text-muted)]">
+        {t("LoginRequired.NoAccount")}{" "}
+        <Link href="/auth/signup" className="text-[var(--primary)] hover:underline">
+          {t("LoginRequired.SignUp")}
         </Link>
-        <p className="mt-4 text-sm text-[var(--text-muted)]">
-          {t("LoginRequired.NoAccount")}{" "}
-          <Link
-            href="/auth/signup"
-            className="text-[var(--primary)] hover:underline"
-          >
-            {t("LoginRequired.SignUp")}
-          </Link>
-        </p>
-      </motion.div>
-    </div>
+      </p>
+    </motion.div>
   );
 }
 
@@ -168,7 +160,6 @@ function OrderDetailModal({
         className="bg-[var(--bg-card)] rounded-2xl max-w-lg w-full max-h-[90vh] overflow-hidden"
         dir={isRTL ? "rtl" : "ltr"}
       >
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
           <div>
             <h2 className="text-xl font-bold text-[var(--text-primary)]">
@@ -186,31 +177,22 @@ function OrderDetailModal({
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)] space-y-6">
-          {/* Status */}
           <div
             className={`flex items-center gap-3 p-4 rounded-xl ${isRTL ? "flex-row-reverse" : ""}`}
             style={{ backgroundColor: statusConfig.bgColor }}
           >
-            <StatusIcon
-              className="w-6 h-6"
-              style={{ color: statusConfig.color }}
-            />
+            <StatusIcon className="w-6 h-6" style={{ color: statusConfig.color }} />
             <div className={isRTL ? "text-right" : ""}>
               <p className="text-sm text-[var(--text-muted)]">
                 {t("OrderDetail.Status")}
               </p>
-              <p
-                className="font-semibold"
-                style={{ color: statusConfig.color }}
-              >
+              <p className="font-semibold" style={{ color: statusConfig.color }}>
                 {t(`Status.${order.status}`)}
               </p>
             </div>
           </div>
 
-          {/* Delivery Info */}
           <div className="space-y-3">
             <h3 className="font-semibold text-[var(--text-primary)]">
               {t("OrderDetail.DeliveryInfo")}
@@ -219,31 +201,24 @@ function OrderDetailModal({
               className={`flex items-start gap-3 text-sm ${isRTL ? "flex-row-reverse text-right" : ""}`}
             >
               <MapPin className="w-4 h-4 text-[var(--text-muted)] mt-0.5" />
-              <span className="text-[var(--text-primary)]">
-                {order.address}
-              </span>
+              <span className="text-[var(--text-primary)]">{order.address}</span>
             </div>
             <div
               className={`flex items-center gap-3 text-sm ${isRTL ? "flex-row-reverse" : ""}`}
             >
               <Phone className="w-4 h-4 text-[var(--text-muted)]" />
-              <span className="text-[var(--text-primary)]">
-                {order.customerPhone}
-              </span>
+              <span className="text-[var(--text-primary)]">{order.customerPhone}</span>
             </div>
             {order.customerEmail && (
               <div
                 className={`flex items-center gap-3 text-sm ${isRTL ? "flex-row-reverse" : ""}`}
               >
                 <Mail className="w-4 h-4 text-[var(--text-muted)]" />
-                <span className="text-[var(--text-primary)]">
-                  {order.customerEmail}
-                </span>
+                <span className="text-[var(--text-primary)]">{order.customerEmail}</span>
               </div>
             )}
           </div>
 
-          {/* Payment Method */}
           <div
             className={`flex items-center gap-3 text-sm ${isRTL ? "flex-row-reverse" : ""}`}
           >
@@ -255,7 +230,6 @@ function OrderDetailModal({
             </span>
           </div>
 
-          {/* Items */}
           <div className="space-y-3">
             <h3 className="font-semibold text-[var(--text-primary)]">
               {t("OrderDetail.Items")}
@@ -295,19 +269,15 @@ function OrderDetailModal({
             ))}
           </div>
 
-          {/* Order Notes */}
           {order.notes && (
             <div className="bg-[var(--warning-light)] rounded-xl p-4">
               <h3 className="font-semibold text-[var(--warning)] mb-2">
                 {t("OrderDetail.Notes")}
               </h3>
-              <p className="text-sm text-[var(--text-primary)]">
-                {order.notes}
-              </p>
+              <p className="text-sm text-[var(--text-primary)]">{order.notes}</p>
             </div>
           )}
 
-          {/* Summary */}
           <div className="border-t border-[var(--border)] pt-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-[var(--text-secondary)]">
@@ -356,86 +326,77 @@ export default function OrdersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [orders, setOrders] = useState<SerializedOrder[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<SerializedOrder | null>(
-    null,
-  );
+  const [selectedOrder, setSelectedOrder] = useState<SerializedOrder | null>(null);
 
   useEffect(() => {
+    let isCancelled = false;
+
     const fetchData = async () => {
       try {
         const currentUser = await getCurrentUser();
+        if (isCancelled) {
+          return;
+        }
+
         setUser(currentUser);
 
         if (currentUser) {
           const result = await getOrdersByUser(currentUser.id);
-          setOrders(result.data || []);
+          if (!isCancelled) {
+            setOrders(result.data || []);
+          }
         }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
-    fetchData();
+    void fetchData();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
-  if (isLoading) return <OrdersSkeleton />;
+  const activeOrdersCount = useMemo(
+    () =>
+      orders.filter(
+        (o) => o.status !== "DELIVERED" && o.status !== "CANCELLED",
+      ).length,
+    [orders],
+  );
 
-  if (!user) return <LoginPrompt />;
+  const heroStats = useMemo(() => {
+    if (isLoading || !user) {
+      return undefined;
+    }
+
+    return [
+      { value: t("TotalOrders", { count: orders.length }) },
+      { value: t("ActiveOrders", { count: activeOrdersCount }) },
+    ];
+  }, [activeOrdersCount, isLoading, orders.length, t, user]);
 
   return (
     <div className="min-h-screen bg-[var(--bg)]" dir={isRTL ? "rtl" : "ltr"}>
-      {/* Hero Header - Updated to match contact page style */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0c4a6e] via-[#0369a1] to-[#0ea5e9] text-white">
-        <div className="absolute inset-0 opacity-[0.07]">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC40Ij48cGF0aCBkPSJNMzYgMzRjMC0yLjIwOS0xLjc5MS00LTQtNHMtNCAxLjc5MS00IDQgMS43OTEgNCA0IDQgNC0xLjc5MSA0LTR6bTAtMThjMC0yLjIwOS0xLjc5MS00LTQtNHMtNCAxLjc5MS00IDQgMS43OTEgNCA0IDQgNC0xLjc5MSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] bg-repeat" />
-        </div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#d4a853]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#0ea5e9]/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
+      <PageHero
+        badge={t("Badge")}
+        badgeIcon={<ClipboardList className="w-4 h-4 text-[#d4a853]" />}
+        title={t("Title")}
+        description={t("Subtitle")}
+        stats={heroStats}
+      />
 
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={isRTL ? "text-right" : ""}
-          >
-            <div
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/20 bg-white/10 backdrop-blur mb-4 ${isRTL ? "flex-row-reverse" : ""}`}
-            >
-              <ClipboardList className="w-4 h-4 text-[#d4a853]" />
-              <span className="text-sm font-medium">{t("Badge")}</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              {t("Title")}
-            </h1>
-            <p className="mt-4 text-lg text-slate-200 max-w-2xl">
-              {t("Subtitle")}
-            </p>
-            {orders.length > 0 && (
-              <div
-                className={`mt-6 flex flex-wrap gap-3 text-sm text-slate-200 ${isRTL ? "justify-end" : ""}`}
-              >
-                <span className="px-3 py-2 rounded-full bg-white/10 border border-white/15">
-                  {t("TotalOrders", { count: orders.length })}
-                </span>
-                <span className="px-3 py-2 rounded-full bg-white/10 border border-white/15">
-                  {t("ActiveOrders", {
-                    count: orders.filter(
-                      (o) =>
-                        o.status !== "DELIVERED" && o.status !== "CANCELLED",
-                    ).length,
-                  })}
-                </span>
-              </div>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Orders List */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {orders.length === 0 ? (
+        {isLoading ? (
+          <OrdersListSkeleton />
+        ) : !user ? (
+          <LoginPrompt />
+        ) : orders.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -467,6 +428,9 @@ export default function OrdersPage() {
             {orders.map((order, index) => {
               const statusConfig = STATUS_CONFIG[order.status];
               const StatusIcon = statusConfig.icon;
+              const activeStepIndex = ACTIVE_ORDER_STEPS.findIndex(
+                (step) => step === order.status,
+              );
 
               return (
                 <motion.div
@@ -481,7 +445,6 @@ export default function OrdersPage() {
                     <div
                       className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isRTL ? "sm:flex-row-reverse" : ""}`}
                     >
-                      {/* Order Info */}
                       <div className={isRTL ? "text-right" : ""}>
                         <div
                           className={`flex items-center gap-2 mb-1 ${isRTL ? "flex-row-reverse justify-end" : ""}`}
@@ -507,9 +470,7 @@ export default function OrdersPage() {
                             className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}
                           >
                             <Calendar className="w-4 h-4" />
-                            {new Date(order.createdAt).toLocaleDateString(
-                              locale,
-                            )}
+                            {new Date(order.createdAt).toLocaleDateString(locale)}
                           </span>
                           <span
                             className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}
@@ -520,7 +481,6 @@ export default function OrdersPage() {
                         </div>
                       </div>
 
-                      {/* Price & Action */}
                       <div
                         className={`flex items-center gap-4 ${isRTL ? "flex-row-reverse" : ""}`}
                       >
@@ -540,7 +500,6 @@ export default function OrdersPage() {
                       </div>
                     </div>
 
-                    {/* Order Items Preview */}
                     <div
                       className={`mt-4 pt-4 border-t border-[var(--border)] flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
                     >
@@ -580,39 +539,29 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Status Timeline (for active orders) */}
-                  {order.status !== "DELIVERED" &&
-                    order.status !== "CANCELLED" && (
-                      <div className="px-4 sm:px-6 pb-4">
-                        <div className="flex items-center gap-1">
-                          {[
-                            "PENDING",
-                            "CONFIRMED",
-                            "PROCESSING",
-                            "SHIPPED",
-                            "DELIVERED",
-                          ].map((status, idx, arr) => {
-                            const isActive =
-                              arr.indexOf(order.status) >= idx ||
-                              order.status === status;
-                            const isCurrent = order.status === status;
-                            return (
-                              <div key={status} className="flex-1">
-                                <div
-                                  className={`h-1.5 rounded-full transition-colors ${
-                                    isActive
-                                      ? isCurrent
-                                        ? "bg-[var(--primary)]"
-                                        : "bg-[var(--success)]"
-                                      : "bg-[var(--border)]"
+                  {order.status !== "DELIVERED" && order.status !== "CANCELLED" && (
+                    <div className="px-4 sm:px-6 pb-4">
+                      <div className="flex items-center gap-1">
+                        {ACTIVE_ORDER_STEPS.map((step, idx) => {
+                          const isActive = activeStepIndex >= idx;
+                          const isCurrent = order.status === step;
+
+                          return (
+                            <div key={step} className="flex-1">
+                              <div
+                                className={`h-1.5 rounded-full transition-colors ${isActive
+                                    ? isCurrent
+                                      ? "bg-[var(--primary)]"
+                                      : "bg-[var(--success)]"
+                                    : "bg-[var(--border)]"
                                   }`}
-                                />
-                              </div>
-                            );
-                          })}
-                        </div>
+                              />
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
+                    </div>
+                  )}
                 </motion.div>
               );
             })}
@@ -620,7 +569,6 @@ export default function OrdersPage() {
         )}
       </div>
 
-      {/* Order Detail Modal */}
       <AnimatePresence>
         {selectedOrder && (
           <OrderDetailModal
