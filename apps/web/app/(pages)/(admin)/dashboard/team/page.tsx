@@ -668,7 +668,7 @@ export default function TeamPage() {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="overflow-hidden p-6">
             <Header
                 title="Team Management"
                 description="Create, update, and remove admins and super admins with minimal clicks."
