@@ -23,7 +23,8 @@ import {
   X,
 } from "lucide-react";
 import { getProducts } from "@/actions/productActions";
-import { AuthUser, getCurrentUser } from "@/actions/authActions";
+import { getCurrentUser } from "@/actions/authActions";
+import { AuthUser } from "@/types";
 import { getCategoryBySlug } from "@/actions/categoriesAction";
 import { usePersistentCart } from "@/lib/usePersistentCart";
 import {

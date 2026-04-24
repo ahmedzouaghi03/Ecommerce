@@ -16,14 +16,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import {
-  SerializedCategory,
   getCategories,
   createCategory,
   updateCategory,
   deleteCategory,
   toggleCategoryStatus,
-  CreateCategoryInput,
 } from "@/actions/categoriesAction";
+import { SerializedCategory, CreateCategoryInput } from "@/types";
 import Uploader from "@/components/admin/Uploader";
 import Header from "@/components/admin/Header";
 import PrimaryButton from "@/components/ui/PrimaryButton";

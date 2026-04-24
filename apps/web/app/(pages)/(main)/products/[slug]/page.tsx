@@ -15,7 +15,8 @@ import CartPreview from "@/components/main/CartPreview";
 import BoxSizeSelector from "@/components/main/BoxSizeSelector";
 
 import { getProductBySlug, getProducts } from "@/actions/productActions";
-import { getCurrentUser, type AuthUser } from "@/actions/authActions";
+import { getCurrentUser } from "@/actions/authActions";
+import { AuthUser } from "@/types";
 import { usePersistentCart } from "@/lib/usePersistentCart";
 import { buildSingleProductCartItem, getBoxesForCustomerType } from "@/lib/cart";
 import type { CustomerType, SerializedProductWithCategory } from "@/types";
@@ -341,8 +342,8 @@ export default function ProductDetailsPage() {
                                                         <button
                                                             onClick={() => setCustomerType("individual")}
                                                             className={`px-4 py-2 rounded-xl border transition-all font-semibold ${customerType === "individual"
-                                                                    ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
-                                                                    : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-muted)]"
+                                                                ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
+                                                                : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-muted)]"
                                                                 }`}
                                                         >
                                                             Individual
@@ -350,8 +351,8 @@ export default function ProductDetailsPage() {
                                                         <button
                                                             onClick={() => setCustomerType("restaurant")}
                                                             className={`px-4 py-2 rounded-xl border transition-all font-semibold ${customerType === "restaurant"
-                                                                    ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
-                                                                    : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-muted)]"
+                                                                ? "border-[var(--primary)] bg-[var(--primary-light)] text-[var(--primary)]"
+                                                                : "border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-muted)]"
                                                                 }`}
                                                         >
                                                             Restaurant
@@ -374,8 +375,8 @@ export default function ProductDetailsPage() {
                                                         onClick={canAddToCart ? handleAddToCart : undefined}
                                                         disabled={!canAddToCart}
                                                         className={`inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl font-semibold text-white text-lg transition-all ${canAddToCart
-                                                                ? "hover:scale-105 cursor-pointer opacity-100"
-                                                                : "opacity-60 cursor-not-allowed hover:scale-100 pointer-events-none"
+                                                            ? "hover:scale-105 cursor-pointer opacity-100"
+                                                            : "opacity-60 cursor-not-allowed hover:scale-100 pointer-events-none"
                                                             }`}
                                                         style={{
                                                             background:
