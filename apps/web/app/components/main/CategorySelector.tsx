@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Check, Layers } from "lucide-react";
-import { SerializedCategory, getCategories } from "@/actions/categoriesAction";
+import { getCategories } from "@/actions/categoriesAction";
+import { SerializedCategory } from "@/types";
 
 type CategorySelectorProps = {
   selectedCategoryId: string | null;
@@ -60,19 +61,17 @@ export default function CategorySelector({
       {/* All Categories Option */}
       <button
         onClick={() => onCategoryChange(null)}
-        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-          selectedCategoryId === null
-            ? "border-[var(--primary)] bg-[var(--primary-light)]"
-            : "border-[var(--border)] hover:border-[var(--primary)]/50 bg-[var(--bg-card)]"
-        }`}
+        className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${selectedCategoryId === null
+          ? "border-[var(--primary)] bg-[var(--primary-light)]"
+          : "border-[var(--border)] hover:border-[var(--primary)]/50 bg-[var(--bg-card)]"
+          }`}
       >
         <div className="flex-1 text-left">
           <div
-            className={`font-medium ${
-              selectedCategoryId === null
-                ? "text-[var(--primary)]"
-                : "text-[var(--text-primary)]"
-            }`}
+            className={`font-medium ${selectedCategoryId === null
+              ? "text-[var(--primary)]"
+              : "text-[var(--text-primary)]"
+              }`}
           >
             All Products
           </div>
@@ -93,11 +92,10 @@ export default function CategorySelector({
             onClick={() => onCategoryChange(category.id)}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-              selectedCategoryId === category.id
-                ? "border-[var(--primary)] bg-[var(--primary-light)]"
-                : "border-[var(--border)] hover:border-[var(--primary)]/50 bg-[var(--bg-card)]"
-            }`}
+            className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${selectedCategoryId === category.id
+              ? "border-[var(--primary)] bg-[var(--primary-light)]"
+              : "border-[var(--border)] hover:border-[var(--primary)]/50 bg-[var(--bg-card)]"
+              }`}
           >
             {/* Category Image */}
             {category.image && (
@@ -114,11 +112,10 @@ export default function CategorySelector({
             {/* Category Info */}
             <div className="flex-1 text-left">
               <div
-                className={`font-medium ${
-                  selectedCategoryId === category.id
-                    ? "text-[var(--primary)]"
-                    : "text-[var(--text-primary)]"
-                }`}
+                className={`font-medium ${selectedCategoryId === category.id
+                  ? "text-[var(--primary)]"
+                  : "text-[var(--text-primary)]"
+                  }`}
               >
                 {category.name}
               </div>
