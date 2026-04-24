@@ -1,4 +1,5 @@
 import type { Prisma, OrderStatus, PaymentMethod, Role, UserType } from "@monkeyprint/db";
+import type { LucideIcon } from "lucide-react";
 
 // ──────────────────────────────────────────────
 // Global Types
@@ -368,6 +369,31 @@ export type OrderStatistics = {
   cancelledOrders: number;
   totalRevenue: number;
   todayOrders: number;
+};
+
+// Shared UI typing for Orders pages
+export type OrderStatusUiConfig = {
+  labelKey: string;
+  color: string;
+  bgColor: string;
+  icon: LucideIcon;
+};
+
+export type OrderStatusUiMap = Record<OrderStatus, OrderStatusUiConfig>;
+
+export type ActiveOrderTimelineStatus = Extract<
+  OrderStatus,
+  "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED"
+>;
+
+// Shared form typing for Checkout page
+export type CheckoutFormData = {
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  address: string;
+  notes: string;
+  paymentMethod: PaymentMethod;
 };
 
 // ──────────────────────────────────────────────
