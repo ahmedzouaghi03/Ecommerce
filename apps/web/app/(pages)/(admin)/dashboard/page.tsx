@@ -136,7 +136,7 @@ async function DashboardDataSection() {
                         <div className="flex-1">
                             <p className="text-sm text-[#64748b] font-medium">Total Revenue</p>
                             <p className="text-2xl font-bold text-[#0f172a] mt-1">
-                                ${formatCurrency(stats.totalRevenue)}
+                                {formatCurrency(stats.totalRevenue)} TND
                             </p>
                             <p className="text-xs text-emerald-600 font-semibold mt-1">
                                 {revenueChange} from last month
@@ -252,7 +252,7 @@ async function DashboardDataSection() {
                                         />
                                     </div>
                                     <span className="text-sm font-semibold text-[#0f172a] w-20 text-right">
-                                        ${day.revenue.toFixed(2)}
+                                        {day.revenue.toFixed(2)} TND
                                     </span>
                                 </div>
                             );
@@ -347,7 +347,7 @@ async function DashboardDataSection() {
                                     <div className="flex items-center gap-3">
                                         <OrderStatusBadge status={order.status} />
                                         <p className="font-bold text-[#0f172a] text-sm">
-                                            ${order.total.toFixed(2)}
+                                            {order.total.toFixed(2)} TND
                                         </p>
                                     </div>
                                 </div>
