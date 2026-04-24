@@ -16,14 +16,6 @@ import type {
   UpdateProductInput,
 } from "@/types";
 
-export type {
-  CreateCategoryInput,
-  CreateProductInput,
-  GetProductsOptions,
-  ProductWithCategory,
-  SerializedProductWithCategory,
-  UpdateProductInput,
-} from "@/types";
 
 const PRODUCT_REVALIDATION_PATHS = ["/", "/products", "/dashboard/products"] as const;
 const DEFAULT_CATEGORY_SLUG = "general";

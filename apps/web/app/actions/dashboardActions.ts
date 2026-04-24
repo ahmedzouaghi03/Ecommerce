@@ -10,14 +10,7 @@ import type {
     DashboardStats,
 } from "@/types";
 
-export type {
-    DashboardDailyRevenue as DailyRevenue,
-    DashboardLowStockProduct as LowStockProduct,
-    DashboardOrderStatusCount as OrderStatusCount,
-    DashboardRecentContact as RecentContact,
-    DashboardRecentOrder as RecentOrder,
-    DashboardStats,
-} from "@/types";
+
 
 const EMPTY_DASHBOARD_STATS: DashboardStats = {
     totalOrders: 0,

@@ -15,16 +15,7 @@ import type {
   UpdateOrderStatusInput,
 } from "@/types";
 
-export type {
-  CreateOrderInput,
-  GetOrdersOptions,
-  OrderStatistics,
-  OrderWithItems,
-  SerializedOrder,
-  SerializedOrderItem,
-  UpdateOrderInput,
-  UpdateOrderStatusInput,
-} from "@/types";
+
 
 const FREE_SHIPPING_THRESHOLD = 100;
 const DEFAULT_SHIPPING_COST = 7;

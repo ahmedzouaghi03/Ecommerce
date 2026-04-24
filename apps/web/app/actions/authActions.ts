@@ -16,14 +16,6 @@ import type {
   UpdateAdminInput,
 } from "@/types";
 
-export type {
-  AuthUser,
-  CreateAdminInput,
-  GetAdminsOptions,
-  SerializedAdmin,
-  TeamManagedRole,
-  UpdateAdminInput,
-} from "@/types";
 
 const COOKIE_NAME = "authToken";
 const MIN_PASSWORD_LENGTH = 8;

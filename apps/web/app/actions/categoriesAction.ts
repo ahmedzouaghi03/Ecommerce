@@ -9,12 +9,6 @@ import type {
   UpdateCategoryInput,
 } from "@/types";
 
-export type {
-  CreateCategoryInput,
-  GetCategoriesOptions,
-  SerializedCategory,
-  UpdateCategoryInput,
-} from "@/types";
 
 const CATEGORY_REVALIDATION_PATHS = [
   "/products",
